@@ -1,7 +1,7 @@
 import tensorflow as tf
 import pandas as pd
 import psutil as ps
-import vcgencmd
+from vcgencmd import Vcgencmd
 import plotly.express as px
 import plotly.graph_objects as go
 from threading import Thread
@@ -59,6 +59,7 @@ def perf_processing(perf):
 
 
 def perf_reader():
+    vcgm = Vcgencmd()
     global thread_running
     print("Starting perf monitoring...")
     perf = {"Time (fit)": [], "CPU_Usage (fit)": [], "Memory_Usage (fit)": [], "Core Voltage (fit)": [], "Temperature (fit)": [],
@@ -71,8 +72,8 @@ def perf_reader():
         perf['Time (fit)'].append(time.time() - start_time)
         perf['CPU_Usage (fit)'].append(ps.cpu_percent())
         perf['Memory_Usage (fit)'].append(ps.virtual_memory().percent)
-        perf['Core Voltage (fit)'].append(vcgencmd.measure_volts('core'))
-        perf['Temperature (fit)'].append(vcgencmd.measure_temp())
+        perf['Core Voltage (fit)'].append(vcgm.measure_volts('core'))
+        perf['Temperature (fit)'].append(vcgm.measure_temp())
     
 
     while thread_running:
@@ -80,8 +81,8 @@ def perf_reader():
         perf['Time (evaluate)'].append(time.time() - start_time)
         perf['CPU_Usage (evaluate)'].append(ps.cpu_percent())
         perf['Memory_Usage (evaluate)'].append(ps.virtual_memory().percent)
-        perf['Core Voltage (evaluate)'].append(vcgencmd.measure_volts('core'))
-        perf['Temperature (evaluate)'].append(vcgencmd.measure_temp())
+        perf['Core Voltage (evaluate)'].append(vcgm.measure_volts('core'))
+        perf['Temperature (evaluate)'].append(vcgm.measure_temp())
     
     perf_processing(perf)
 
