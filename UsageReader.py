@@ -67,7 +67,7 @@ def perf_reader():
     start_time = time.time()
 
 
-    while thread_running:
+    while perf_fit:
         time.sleep(0.1)
         perf['Time (fit)'].append(time.time() - start_time)
         perf['CPU_Usage (fit)'].append(ps.cpu_percent())
@@ -76,7 +76,7 @@ def perf_reader():
         perf['Temperature (fit)'].append(vcgm.measure_temp())
     
 
-    while thread_running:
+    while perf_evaluate:
         time.sleep(0.1)
         perf['Time (evaluate)'].append(time.time() - start_time)
         perf['CPU_Usage (evaluate)'].append(ps.cpu_percent())
