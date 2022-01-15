@@ -8,42 +8,41 @@ from threading import Thread
 import time
 import os
 
-thread_running = True
 
 def perf_processing(perf):
-    perf_df = pd.DataFrame(perf)
-    perf_df.to_csv("perf.csv",index=False)
+    perf_df = pd.DataFrame([perf])
+    perf_df.to_csv("/perf.csv",index=False)
 
     # Create traces
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=perf["Time"], y=perf["CPU_Usage (fit)"],
+    fig.add_trace(go.Scatter(x=perf["Time (fit)"], y=perf["CPU_Usage (fit)"],
                         mode='lines',
                         name='CPU Usage (fit)'))
-    fig.add_trace(go.Scatter(x=perf["Time"], y=perf["Memory_Usage (fit)"],
+    fig.add_trace(go.Scatter(x=perf["Time (fit)"], y=perf["Memory_Usage (fit)"],
                         mode='lines',
                         name='Memory Usage (fit)'))
     
-    fig.add_trace(go.Scatter(x=perf["Time"], y=perf["Core Voltage (fit)"],
+    fig.add_trace(go.Scatter(x=perf["Time (fit)"], y=perf["Core Voltage (fit)"],
                         mode='lines',
                         name='Core Voltage (fit)'))
 
-    fig.add_trace(go.Scatter(x=perf["Time"], y=perf["Temperature (fit)"],
+    fig.add_trace(go.Scatter(x=perf["Time (fit)"], y=perf["Temperature (fit)"],
                         mode='lines',
                         name='Temperature (fit)'))
     
     # Evaluate
-    fig.add_trace(go.Scatter(x=perf["Time"], y=perf["CPU_Usage (evaluate)"],
+    fig.add_trace(go.Scatter(x=perf["Time (evaluate)"], y=perf["CPU_Usage (evaluate)"],
                         mode='lines',
                         name='CPU Usage (evaluate)'))
-    fig.add_trace(go.Scatter(x=perf["Time"], y=perf["Memory_Usage (evaluate)"],
+    fig.add_trace(go.Scatter(x=perf["Time (evaluate)"], y=perf["Memory_Usage (evaluate)"],
                         mode='lines',
                         name='Memory Usage (evaluate)'))
     
-    fig.add_trace(go.Scatter(x=perf["Time"], y=perf["Core Voltage (evaluate)"],
+    fig.add_trace(go.Scatter(x=perf["Time (evaluate)"], y=perf["Core Voltage (evaluate)"],
                         mode='lines',
                         name='Core Voltage (evaluate)'))
 
-    fig.add_trace(go.Scatter(x=perf["Time"], y=perf["Temperature (evaluate)"],
+    fig.add_trace(go.Scatter(x=perf["Time (evaluate)"], y=perf["Temperature (evaluate)"],
                         mode='lines',
                         name='Temperature (evaluate)'))
 
@@ -52,7 +51,7 @@ def perf_processing(perf):
                    yaxis_title='Usage (%)')
                    
 
-    fig.write_html("perf.html")
+    fig.write_html("/perf.html")
     print("Files built")
     fig.show()
 
@@ -60,13 +59,15 @@ def perf_processing(perf):
 
 def perf_reader():
     vcgm = Vcgencmd()
-    global thread_running
     print("Starting perf monitoring...")
     perf = {"Time (fit)": [], "CPU_Usage (fit)": [], "Memory_Usage (fit)": [], "Core Voltage (fit)": [], "Temperature (fit)": [],
             "Time (evaluate)": [], "CPU_Usage (evaluate)": [], "Memory_Usage (evaluate)": [], "Core Voltage (evaluate)": [], "Temperature (evaluate)": []}
     start_time = time.time()
+    
 
-
+    global perf_fit
+    print("perf_fit 1 :" + str(perf_fit))
+    
     while perf_fit:
         time.sleep(0.1)
         perf['Time (fit)'].append(time.time() - start_time)
@@ -75,6 +76,9 @@ def perf_reader():
         perf['Core Voltage (fit)'].append(vcgm.measure_volts('core'))
         perf['Temperature (fit)'].append(vcgm.measure_temp())
     
+    print("perf_fit 2 :" + str(perf_fit))
+    global perf_evaluate
+    print("perf_evaluate 2 :" + str(perf_evaluate))
 
     while perf_evaluate:
         time.sleep(0.1)
@@ -88,6 +92,7 @@ def perf_reader():
 
 
 def runner():
+    time.sleep(10)
     mnist = tf.keras.datasets.mnist
 
     (x_train, y_train),(x_test, y_test) = mnist.load_data()
@@ -104,13 +109,15 @@ def runner():
                 metrics=['accuracy'])
 
     model.fit(x_train, y_train, epochs=1)
+    global perf_fit
     perf_fit = False
 
     loss, acc = model.evaluate(x_test, y_test)
+    global perf_evaluate
     perf_evaluate = False
 
-    print("Saving the model")
     model.save('my_mnist_model.h5')
+    print("Model saved")
 
 
 if __name__ == '__main__':
