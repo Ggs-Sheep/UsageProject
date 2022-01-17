@@ -11,7 +11,7 @@ import os
 
 def perf_processing(perf):
     perf_df = pd.DataFrame([perf])
-    perf_df.to_csv("/perf.csv",index=False)
+    perf_df.to_csv("/home/pi/Mnist/UsageProject/perf.csv",index=False)
 
     # Create traces
     fig = go.Figure()
@@ -51,9 +51,9 @@ def perf_processing(perf):
                    yaxis_title='Usage (%)')
                    
 
-    fig.write_html("/perf.html")
+    fig.write_html("/home/pi/Mnist/UsageProject/perf.html")
     print("Files built")
-    fig.show()
+    #fig.show()
 
 
 
@@ -66,7 +66,7 @@ def perf_reader():
     
 
     global perf_fit
-    print("perf_fit 1 :" + str(perf_fit))
+    
     
     while perf_fit:
         time.sleep(0.1)
@@ -76,9 +76,9 @@ def perf_reader():
         perf['Core Voltage (fit)'].append(vcgm.measure_volts('core'))
         perf['Temperature (fit)'].append(vcgm.measure_temp())
     
-    print("perf_fit 2 :" + str(perf_fit))
+    
     global perf_evaluate
-    print("perf_evaluate 2 :" + str(perf_evaluate))
+    
 
     while perf_evaluate:
         time.sleep(0.1)
@@ -111,7 +111,7 @@ def runner():
     model.fit(x_train, y_train, epochs=1)
     global perf_fit
     perf_fit = False
-
+    time.sleep(10)
     loss, acc = model.evaluate(x_test, y_test)
     global perf_evaluate
     perf_evaluate = False
