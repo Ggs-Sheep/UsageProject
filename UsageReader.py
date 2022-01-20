@@ -9,7 +9,15 @@ import time
 import os
 
 
-def perf_processing(perf):
+def perf_processing(perf:dict):
+    """Generating a plot based on given rapsberry pi data
+
+    Args:
+        perf (dict): Data of raspberry pi : {"Time (fit)": [], "CPU_Usage (fit)": [], "Memory_Usage (fit)": [], "Core Voltage (fit)": [], "Temperature (fit)": [],
+            "Time (evaluate)": [], "CPU_Usage (evaluate)": [], "Memory_Usage (evaluate)": [], "Core Voltage (evaluate)": [], "Temperature (evaluate)": []}
+    """
+
+    # Reading given perf argument and creating a DataFrame
     perf_df = pd.DataFrame([perf])
     perf_df.to_csv("/home/pi/Mnist/UsageProject/perf.csv",index=False)
 
@@ -58,6 +66,9 @@ def perf_processing(perf):
 
 
 def perf_reader():
+    """Thread used to read data of the raspberry pi.
+    Reading CPU Usage, Memory Usage, Core Voltage & Temperature on each step on the process
+    """
     vcgm = Vcgencmd()
     print("Starting perf monitoring...")
     perf = {"Time (fit)": [], "CPU_Usage (fit)": [], "Memory_Usage (fit)": [], "Core Voltage (fit)": [], "Temperature (fit)": [],
@@ -92,6 +103,8 @@ def perf_reader():
 
 
 def runner():
+    """TensorFlow function, used here to detect process activity in system data
+    """
     time.sleep(10)
     mnist = tf.keras.datasets.mnist
 
@@ -129,6 +142,6 @@ if __name__ == '__main__':
     t1.start()
     t2.start()
 
-    t2.join()  # interpreter will wait until your process get completed or terminated
+    t2.join() 
     print('Monitoring finished')
 
